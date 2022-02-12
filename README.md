@@ -1,0 +1,1 @@
+This project develop a pair of programs that interact to model the hot potato game.
