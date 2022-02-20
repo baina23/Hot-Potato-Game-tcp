@@ -63,6 +63,10 @@ int main(int argc, char *argv[])
     return -1;
   } //if
 
+  char myhostname[128];
+  gethostname(myhostname, sizeof(myhostname));
+  cout << myhostname << endl;
+
   char buffer[512];
   recv(client_connection_fd, buffer, 9, 0);
   buffer[9] = 0;
