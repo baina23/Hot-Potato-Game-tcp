@@ -159,7 +159,6 @@ int main(int argc, char *argv[])
       close(nbsocket_fd);
     } //if
   
-  
     status = connect(nbsocket_fd, nb_info_list->ai_addr, nb_info_list->ai_addrlen);
     if (status == -1) {
       cerr << "Error: cannot connect to neighbor socket" << endl;
@@ -209,15 +208,12 @@ int main(int argc, char *argv[])
 
     if(FD_ISSET(socket_fd, &readfds)){
       if(recv(socket_fd, &ptt, sizeof(ptt),0) == 0) break;
-      //cout << "potato from master" << endl;
     }
     else if(FD_ISSET(nbsocket_fd, &readfds)){
       if(recv(nbsocket_fd, &ptt, sizeof(ptt),0) == 0) break;
-      //cout << "potato from right neighbor" << endl;
     }
     else if(FD_ISSET(neighbor_fd, &readfds)){
       if(recv(neighbor_fd, &ptt, sizeof(ptt),0) == 0) break;
-      //cout << "potato from left neighbor" << endl;
     }
     else continue;
     
@@ -246,6 +242,8 @@ int main(int argc, char *argv[])
     }
    
   }
+
+  // *************************** game over, close connections ********************************
 
   freeaddrinfo(host_info_list);
   freeaddrinfo(my_info_list);

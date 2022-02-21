@@ -1,4 +1,5 @@
 #include <vector>
+#include <arpa/inet.h>
 #include "potato.h"
 
 
@@ -73,7 +74,7 @@ int main(int argc, char *argv[])
 
   struct sockaddr_storage socket_addr;
   socklen_t socket_addr_len = sizeof(socket_addr);
-  vector<string> players_id;
+  vector<string> players_ip;
   vector<string> players_port;
   
   int client_connection_fd[num_players];
@@ -93,8 +94,9 @@ int main(int argc, char *argv[])
       return -1;
     }
    
-    string _ip = playerbuf.ip;
-    players_id.push_back(_ip);
+    struct sockaddr_in *s_addr = (struct sockaddr_in *) &socket_addr;
+    string _ip = inet_ntoa(s_addr->sin_addr);
+    players_ip.push_back(_ip);
     string _port = playerbuf.port;
     players_port.push_back(_port);
 
@@ -106,7 +108,7 @@ int main(int argc, char *argv[])
   for(int i = 0; i < num_players; ++i){
     struct info_to_player masterbuf;
     int masterbuf_len = sizeof(masterbuf);
-    strcpy(masterbuf.neighbor_ip, players_id[(i+1) % num_players].c_str());
+    strcpy(masterbuf.neighbor_ip, players_ip[(i+1) % num_players].c_str());
     strcpy(masterbuf.neighbor_port, players_port[(i+1) % num_players].c_str());
     masterbuf.player_id = i;
     masterbuf.players_num = num_players;
