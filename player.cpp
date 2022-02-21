@@ -154,15 +154,15 @@ int main(int argc, char *argv[])
           nb_info_list->ai_socktype, 
           nb_info_list->ai_protocol);
     if (nbsocket_fd == -1) {
-      cerr << "Error: cannot create socket for neighbor" << endl;
-      cerr << "  (" << nb_hostname << "," << nb_port << ")" << endl;
+      //cerr << "Error: cannot create socket for neighbor" << endl;
+      //cerr << "  (" << nb_hostname << "," << nb_port << ")" << endl;
       close(nbsocket_fd);
     } //if
   
     status = connect(nbsocket_fd, nb_info_list->ai_addr, nb_info_list->ai_addrlen);
     if (status == -1) {
-      cerr << "Error: cannot connect to neighbor socket" << endl;
-      cerr << "  (" << nb_hostname << "," << nb_port << ")" << endl;
+      //cerr << "Error: cannot connect to neighbor socket" << endl;
+      //cerr << "  (" << nb_hostname << "," << nb_port << ")" << endl;
       close(nbsocket_fd);
     } //if
   }
@@ -231,6 +231,7 @@ int main(int argc, char *argv[])
         cerr << "Error: cannot send on socket " << endl; 
         return -1;
       }
+      cout << ptt.index << endl;
       break;
     }
     else {

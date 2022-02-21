@@ -94,9 +94,9 @@ int main(int argc, char *argv[])
       return -1;
     }
    
-    //struct sockaddr_in *s_addr = (struct sockaddr_in *) &socket_addr;
-    //string _ip = inet_ntoa(s_addr->sin_addr);
-    string _ip = playerbuf.ip;
+    struct sockaddr_in *s_addr = (struct sockaddr_in *) &socket_addr;
+    string _ip = inet_ntoa(s_addr->sin_addr);
+    //string _ip = playerbuf.ip;
     players_ip.push_back(_ip);
     string _port = playerbuf.port;
     players_port.push_back(_port);
@@ -172,21 +172,30 @@ int main(int argc, char *argv[])
 
   fd_set readfds;
   struct potato buf_res;
-  
-  FD_ZERO(&readfds);
-  for(int i = 0; i < num_players; ++i)
-    FD_SET(client_connection_fd[i],&readfds);
-  int n = client_connection_fd[num_players-1] + 1;
-  int rv;
-  while((rv = select(n, &readfds, NULL, NULL, &timeout)) == 0);
+  struct potato tmp;
+  int recv_potato = 0;
 
-  if(rv == -1)
-    perror("select");
-  else {
-    for(int i = 0; i < num_players; i++){
-      if(FD_ISSET(client_connection_fd[i], &readfds)){
-        recv(client_connection_fd[i], &buf_res, sizeof(buf_res),MSG_WAITALL);
-        break;
+  while(recv_potato == 0){
+    FD_ZERO(&readfds);
+    for(int i = 0; i < num_players; ++i)
+      FD_SET(client_connection_fd[i],&readfds);
+    int n = client_connection_fd[num_players-1] + 1;
+    int rv;
+    while((rv = select(n, &readfds, NULL, NULL, &timeout)) == 0);
+
+    if(rv == -1)
+      perror("select");
+    else {
+      for(int i = 0; i < num_players; i++){
+        if(FD_ISSET(client_connection_fd[i], &readfds)){
+          recv_potato = recv(client_connection_fd[i], &tmp, sizeof(tmp),MSG_WAITALL);
+          if(recv_potato > 0) {
+            buf_res = tmp;
+            cout << "player " << i << endl;
+            cout << buf_res.index << endl;
+            break;
+          }
+        }
       }
     }
   }
