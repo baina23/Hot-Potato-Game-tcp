@@ -31,7 +31,7 @@ struct info_to_player{
 bool send_until(int sockfd, const void *msg, int len, int flags){
     int x = 0;
     while(x < len){
-    int bytes_send = send(sockfd, msg + x, len-x, flags);
+    int bytes_send = send(sockfd, (char*)msg + x, len-x, flags);
     if(bytes_send == -1) return false;
     x = x + bytes_send;
     }
