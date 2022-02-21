@@ -1,11 +1,3 @@
-#include <iostream>
-#include <cstring>
-#include <sys/socket.h>
-#include <netdb.h>
-#include <unistd.h>
-#include <netinet/in.h>
-#include <arpa/inet.h>
-#include <time.h>
 #include "potato.h"
 
 using namespace std;
@@ -37,24 +29,24 @@ int main(int argc, char *argv[])
     return -1;
   } //if
 
-  socket_fd = socket(host_info_list->ai_family, 
-		     host_info_list->ai_socktype, 
-		     host_info_list->ai_protocol);
-  if (socket_fd == -1) {
-    cerr << "Error: cannot create socket" << endl;
-    cerr << "  (" << hostname << "," << port << ")" << endl;
-    return -1;
-  } //if
+  status = -1;
+  while(status == -1){
+    socket_fd = socket(host_info_list->ai_family, 
+          host_info_list->ai_socktype, 
+          host_info_list->ai_protocol);
+    if (socket_fd == -1) {
+      cerr << "Error: cannot create socket" << endl;
+      cerr << "  (" << hostname << "," << port << ")" << endl;
+      close(socket_fd);
+    } //if
   
-  cout << "Connecting to " << hostname << " on port " << port << "..." << endl;
-  
-  status = connect(socket_fd, host_info_list->ai_addr, host_info_list->ai_addrlen);
-  if (status == -1) {
-    cerr << "Error: cannot connect to socket" << endl;
-    cerr << "  (" << hostname << "," << port << ")" << endl;
-    return -1;
-  } //if
-
+    status = connect(socket_fd, host_info_list->ai_addr, host_info_list->ai_addrlen);
+    if (status == -1) {
+      cerr << "Error: cannot connect to socket" << endl;
+      cerr << "  (" << hostname << "," << port << ")" << endl;
+      close(socket_fd);
+    } //if
+  }
 // ********************************* set my local server ***********************************
 
 
@@ -98,10 +90,9 @@ int main(int argc, char *argv[])
   } //if
 
   // get port number
-  int s;
   struct sockaddr_in sa;
   socklen_t sa_len = sizeof(sa);
-  if (getsockname(s, (struct sockaddr *)&sa, &sa_len) == -1) {
+  if (getsockname(mysocket_fd, (struct sockaddr *)&sa, &sa_len) == -1) {
       perror("getsockname() failed");
       return -1;
    }
@@ -114,6 +105,7 @@ int main(int argc, char *argv[])
   struct info_from_player myinfo;
   strcpy(myinfo.ip, myhostname);
   strcpy(myinfo.port, myport);
+
 
   if(!send_until(socket_fd, &myinfo, sizeof(myinfo), 0)){
     cerr << "Error: cannot send on socket to host" << endl; 
@@ -156,25 +148,25 @@ int main(int argc, char *argv[])
     return -1;
   } //if
 
-  nbsocket_fd = socket(nb_info_list->ai_family, 
-		     nb_info_list->ai_socktype, 
-		     nb_info_list->ai_protocol);
-  if (nbsocket_fd == -1) {
-    cerr << "Error: cannot create socket for neighbor" << endl;
-    cerr << "  (" << nb_hostname << "," << nb_port << ")" << endl;
-    return -1;
-  } //if
+  status = -1;
+  while(status == -1){
+    nbsocket_fd = socket(nb_info_list->ai_family, 
+          nb_info_list->ai_socktype, 
+          nb_info_list->ai_protocol);
+    if (nbsocket_fd == -1) {
+      cerr << "Error: cannot create socket for neighbor" << endl;
+      cerr << "  (" << nb_hostname << "," << nb_port << ")" << endl;
+      close(nbsocket_fd);
+    } //if
   
-  cout << "Connecting to " << nb_hostname << " on port " << nb_port << "..." << endl;
   
-  status = connect(nbsocket_fd, nb_info_list->ai_addr, nb_info_list->ai_addrlen);
-  if (status == -1) {
-    cerr << "Error: cannot connect to neighbor socket" << endl;
-    cerr << "  (" << nb_hostname << "," << nb_port << ")" << endl;
-    return -1;
-  } //if
-
-
+    status = connect(nbsocket_fd, nb_info_list->ai_addr, nb_info_list->ai_addrlen);
+    if (status == -1) {
+      cerr << "Error: cannot connect to neighbor socket" << endl;
+      cerr << "  (" << nb_hostname << "," << nb_port << ")" << endl;
+      close(nbsocket_fd);
+    } //if
+  }
   //*************************** accept conncection from my neighbor *******************************
 
   struct sockaddr_storage mysocket_addr;
@@ -187,18 +179,21 @@ int main(int argc, char *argv[])
   } //if
 
   //******************************* send ready info to master *************************************
-    
+
+  char ready_info[] = "I'm ready";
+  if(!send_until(socket_fd, &ready_info, sizeof(ready_info), 0)){
+    cerr << "Error: cannot send on socket to host" << endl; 
+    return -1;
+  }
+  
   //******************************* receive and forward potato ************************************
 
   fd_set readfds;
   struct potato ptt;
   int rv = 0;
-  struct tcp_info info;
-  int tcp_info_len = sizeof(info);
-  while(1){
-    getsockopt(socket_fd, IPPROTO_TCP, TCP_INFO, &info,(socklen_t *) &tcp_info_len);
-    if((info.tcpi_state == TCP_CLOSE)) break;
 
+  srand(time(0));
+  while(1){
     FD_ZERO(&readfds);
     FD_SET(socket_fd, &readfds);
     FD_SET(nbsocket_fd, &readfds);
@@ -213,16 +208,21 @@ int main(int argc, char *argv[])
     }
 
     if(FD_ISSET(socket_fd, &readfds)){
-      recv(socket_fd, &ptt, sizeof(ptt),0);
+      if(recv(socket_fd, &ptt, sizeof(ptt),0) == 0) break;
+      //cout << "potato from master" << endl;
     }
     else if(FD_ISSET(nbsocket_fd, &readfds)){
-      recv(nbsocket_fd, &ptt, sizeof(ptt),0);
+      if(recv(nbsocket_fd, &ptt, sizeof(ptt),0) == 0) break;
+      //cout << "potato from right neighbor" << endl;
     }
     else if(FD_ISSET(neighbor_fd, &readfds)){
-      recv(neighbor_fd, &ptt, sizeof(ptt),0);
+      if(recv(neighbor_fd, &ptt, sizeof(ptt),0) == 0) break;
+      //cout << "potato from left neighbor" << endl;
     }
-    srand(time(NULL));
-    int randplayer = rand() % 2;
+    else continue;
+    
+    
+    int randplayer = rand() % 2;   
     int fd = randplayer ? nbsocket_fd : neighbor_fd;
     int nb_id = randplayer ? (my_id + 1) % num_players : (my_id+num_players-1) % num_players ;
     ptt.hops--;
@@ -237,14 +237,14 @@ int main(int argc, char *argv[])
       }
       break;
     }
-    else{
+    else {
       cout << "sending potato to " << nb_id << endl;
       if(!send_until(fd, &ptt, sizeof(ptt), 0)){
         cerr << "Error: cannot send on socket " << endl; 
         return -1;
       }
     }
-    
+   
   }
 
   freeaddrinfo(host_info_list);

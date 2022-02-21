@@ -1,11 +1,6 @@
-#include <iostream>
-#include <cstring>
-#include <sys/socket.h>
-#include <netdb.h>
-#include <unistd.h>
 #include <vector>
 #include "potato.h"
-#include <time.h>
+
 
 using namespace std;
 
@@ -106,21 +101,55 @@ int main(int argc, char *argv[])
   }
 
 // ************************************* send info to players *************************************
+  fd_set readfds0;
+  FD_ZERO(&readfds0);
   for(int i = 0; i < num_players; ++i){
     struct info_to_player masterbuf;
     int masterbuf_len = sizeof(masterbuf);
     strcpy(masterbuf.neighbor_ip, players_id[(i+1) % num_players].c_str());
     strcpy(masterbuf.neighbor_port, players_port[(i+1) % num_players].c_str());
     masterbuf.player_id = i;
-
+    masterbuf.players_num = num_players;
+    FD_SET(client_connection_fd[i],&readfds0);
     if(!send_until(client_connection_fd[i], &masterbuf, masterbuf_len, 0))
       return -1;
    
-    cout << "Player "<< i << " is ready to play" << endl;
   }
 
 // ******************************** receive ready info from players ******************************
 
+  
+  int count_ready = 0;
+  int n0 = client_connection_fd[num_players-1] + 1;
+  char buf_ready[32];
+  struct timeval timeout;
+  timeout.tv_sec = 3;
+  timeout.tv_usec = 500000;
+  while(count_ready < num_players){
+    int rv;
+    while((rv = select(n0, &readfds0, NULL, NULL, &timeout)) == 0);
+    if(rv == -1){
+      perror("select");
+      return -1;
+    }
+    else {
+      for(int i = 0; i < num_players; i++){
+        if(FD_ISSET(client_connection_fd[i], &readfds0)){
+          int recv_ready = recv(client_connection_fd[i], &buf_ready, sizeof(buf_ready),0);
+          if(recv_ready == 0) {
+            cout << "lose conncetion to player " << i << endl;
+            return -1;
+          }
+          count_ready ++;
+          cout << "Player "<< i << " is ready to play" << endl;
+        }
+      }
+    }
+    FD_ZERO(&readfds0);
+    for(int i = 0; i < num_players; ++i)
+      FD_SET(client_connection_fd[i],&readfds0);
+  }
+  
 
 // ******************************** send potato to a random player *******************************
   struct potato boom;
@@ -140,9 +169,6 @@ int main(int argc, char *argv[])
 
   fd_set readfds;
   struct potato buf_res;
-  struct timeval timeout;
-  timeout.tv_sec = 3;
-  timeout.tv_usec = 500000;
   
   FD_ZERO(&readfds);
   for(int i = 0; i < num_players; ++i)

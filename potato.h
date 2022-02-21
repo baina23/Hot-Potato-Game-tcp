@@ -1,8 +1,14 @@
+#include <iostream>
+#include <cstring>
+#include <sys/socket.h>
+#include <netdb.h>
+#include <unistd.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <netinet/in.h>
-#include <netinet/tcp.h>
 #include <string>
+#include <time.h>
+
 struct potato{
     int trace[1000];
     int hops;
@@ -20,6 +26,7 @@ struct info_to_player{
     char neighbor_ip[128];
     char neighbor_port[16];
 };
+
 
 bool send_until(int sockfd, const void *msg, int len, int flags){
     int x = 0;
