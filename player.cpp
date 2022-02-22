@@ -101,6 +101,14 @@ int main(int argc, char *argv[])
   string myport_string = to_string(my_int_port);
   const char* myport = myport_string.c_str();
 
+  //**************************** start listen at my local port ****************************
+  status = listen(mysocket_fd, 100);
+  if (status == -1) {
+    cerr << "Error: cannot listen on socket" << endl; 
+    cerr << "  (" << myhostname << "," << myport << ")" << endl;
+    return -1;
+  } //if
+
   //***************************** send my info to master *********************************
   struct info_from_player myinfo;
   strcpy(myinfo.ip, myhostname);
@@ -123,13 +131,7 @@ int main(int argc, char *argv[])
   num_players = hostbuf.players_num;
   cout << "Connected as player " << my_id << " out of " << hostbuf.players_num << " total players" << endl;
   
-  //**************************** start listen at my local port ****************************
-  status = listen(mysocket_fd, 100);
-  if (status == -1) {
-    cerr << "Error: cannot listen on socket" << endl; 
-    cerr << "  (" << myhostname << "," << myport << ")" << endl;
-    return -1;
-  } //if
+  
 
   //****************************** connect to my neighbor **********************************
   int nbsocket_fd;
