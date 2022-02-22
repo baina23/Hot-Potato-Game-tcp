@@ -168,7 +168,7 @@ int main(int argc, char *argv[])
       close(nbsocket_fd);
     } //if
   }
-cout << "finish connect to my neighbor!" << endl;
+
 
   //*************************** accept conncection from my neighbor *******************************
 
@@ -180,7 +180,7 @@ cout << "finish connect to my neighbor!" << endl;
     cerr << "Error: cannot accept connection socket for neighbor" << endl;
     return -1;
   } //if
-cout << "finish accept my neighbor!" << endl;
+
   //******************************* send ready info to master *************************************
 
   char ready_info[] = "I'm ready";
@@ -235,7 +235,6 @@ cout << "finish accept my neighbor!" << endl;
         cerr << "Error: cannot send on socket " << endl; 
         return -1;
       }
-      cout << ptt.index << " : " << ptt.trace[ptt.index-1] << endl;
       break;
     }
     else {
@@ -244,7 +243,6 @@ cout << "finish accept my neighbor!" << endl;
         cerr << "Error: cannot send on socket " << endl; 
         return -1;
       }
-      cout << ptt.index << " : " << ptt.trace[ptt.index-1] << endl;
     }
    
   }
