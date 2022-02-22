@@ -233,7 +233,6 @@ int main(int argc, char *argv[])
         cerr << "Error: cannot send on socket " << endl; 
         return -1;
       }
-      cout << ptt.index << endl;
       break;
     }
     else {

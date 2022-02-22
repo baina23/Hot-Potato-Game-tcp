@@ -191,8 +191,6 @@ int main(int argc, char *argv[])
           recv_potato = recv(client_connection_fd[i], &tmp, sizeof(tmp),MSG_WAITALL);
           if(recv_potato > 0) {
             buf_res = tmp;
-            cout << "player " << i << endl;
-            cout << buf_res.index << endl;
             break;
           }
         }
