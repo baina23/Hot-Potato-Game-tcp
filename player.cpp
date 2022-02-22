@@ -211,13 +211,13 @@ cout << "finish accept my neighbor!" << endl;
     }
 
     if(FD_ISSET(socket_fd, &readfds)){
-      if(recv(socket_fd, &ptt, sizeof(ptt),0) == 0) break;
+      if(recv(socket_fd, &ptt, sizeof(ptt),MSG_WAITALL) == 0) break;
     }
     else if(FD_ISSET(nbsocket_fd, &readfds)){
-      if(recv(nbsocket_fd, &ptt, sizeof(ptt),0) == 0) break;
+      if(recv(nbsocket_fd, &ptt, sizeof(ptt),MSG_WAITALL) == 0) break;
     }
     else if(FD_ISSET(neighbor_fd, &readfds)){
-      if(recv(neighbor_fd, &ptt, sizeof(ptt),0) == 0) break;
+      if(recv(neighbor_fd, &ptt, sizeof(ptt),MSG_WAITALL) == 0) break;
     }
     else continue;
     
