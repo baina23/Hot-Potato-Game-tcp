@@ -2,7 +2,6 @@
 #include <arpa/inet.h>
 #include "potato.h"
 
-
 using namespace std;
 
 int main(int argc, char *argv[])

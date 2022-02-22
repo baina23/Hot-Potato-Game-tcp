@@ -168,6 +168,8 @@ int main(int argc, char *argv[])
       close(nbsocket_fd);
     } //if
   }
+cout << "finish connect to my neighbor!" << endl;
+
   //*************************** accept conncection from my neighbor *******************************
 
   struct sockaddr_storage mysocket_addr;
@@ -178,7 +180,7 @@ int main(int argc, char *argv[])
     cerr << "Error: cannot accept connection socket for neighbor" << endl;
     return -1;
   } //if
-
+cout << "finish accept my neighbor!" << endl;
   //******************************* send ready info to master *************************************
 
   char ready_info[] = "I'm ready";
@@ -233,6 +235,7 @@ int main(int argc, char *argv[])
         cerr << "Error: cannot send on socket " << endl; 
         return -1;
       }
+      cout << ptt.index << " : " << ptt.trace[ptt.index-1] << endl;
       break;
     }
     else {
@@ -241,6 +244,7 @@ int main(int argc, char *argv[])
         cerr << "Error: cannot send on socket " << endl; 
         return -1;
       }
+      cout << ptt.index << " : " << ptt.trace[ptt.index-1] << endl;
     }
    
   }
