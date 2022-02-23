@@ -238,7 +238,7 @@ int main(int argc, char *argv[])
       break;
     }
     else {
-      cout << "sending potato to " << nb_id << endl;
+      cout << "Sending potato to " << nb_id << endl;
       if(!send_until(fd, &ptt, sizeof(ptt), 0)){
         cerr << "Error: cannot send on socket " << endl; 
         return -1;
