@@ -95,8 +95,8 @@ int main(int argc, char *argv[])
     }
    
     struct sockaddr_in *s_addr = (struct sockaddr_in *) &socket_addr;
-    string _ip = inet_ntoa(s_addr->sin_addr);
-    //string _ip = playerbuf.ip;
+    //string _ip = inet_ntoa(s_addr->sin_addr);
+    string _ip = playerbuf.ip;
     players_ip.push_back(_ip);
     string _port = playerbuf.port;
     players_port.push_back(_port);
