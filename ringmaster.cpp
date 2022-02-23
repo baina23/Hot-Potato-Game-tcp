@@ -185,8 +185,8 @@ int main(int argc, char *argv[])
     
     int n = client_connection_fd[num_players-1] + 1;
     int rv;
-    rv = select(n, &readfds, NULL, NULL, &timeout);
-
+    rv = select(n, &readfds, NULL, NULL, NULL);
+    
     if(rv == -1)
       perror("select");
     else {

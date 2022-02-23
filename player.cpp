@@ -249,6 +249,11 @@ int main(int argc, char *argv[])
 
   // *************************** game over, close connections ********************************
 
+  if(!send_until(socket_fd, &ptt, sizeof(ptt), 0)){
+        cerr << "Error: cannot send on socket " << endl; 
+        return -1;
+      }
+
   freeaddrinfo(host_info_list);
   freeaddrinfo(my_info_list);
   freeaddrinfo(nb_info_list);
