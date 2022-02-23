@@ -163,6 +163,12 @@ int main(int argc, char *argv[])
   memset(trace, -1, sizeof(boom.trace));
   srand(time(NULL));
   int randplayer = rand() % num_players;
+  
+  fd_set readfds;
+  FD_ZERO(&readfds);
+  for(int i = 0; i < num_players; ++i)
+    FD_SET(client_connection_fd[i],&readfds);
+  
   if(!send_until(client_connection_fd[randplayer], &boom, potato_size,0)) 
     return -1;
 
@@ -170,18 +176,16 @@ int main(int argc, char *argv[])
 
 // ************************************** receive the potato *************************************
 
-  fd_set readfds;
+  
   struct potato buf_res;
   struct potato tmp;
   int recv_potato = 0;
 
   while(recv_potato == 0){
-    FD_ZERO(&readfds);
-    for(int i = 0; i < num_players; ++i)
-      FD_SET(client_connection_fd[i],&readfds);
+    
     int n = client_connection_fd[num_players-1] + 1;
     int rv;
-    while((rv = select(n, &readfds, NULL, NULL, &timeout)) == 0);
+    rv = select(n, &readfds, NULL, NULL, &timeout);
 
     if(rv == -1)
       perror("select");
