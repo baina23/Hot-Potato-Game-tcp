@@ -29,6 +29,7 @@ int main(int argc, char *argv[])
   cout << "Players = " << num_players << endl;
   cout << "Hops = " << num_hops << endl;
 
+  if(num_hops < 1 || num_players < 1) return 0;
   memset(&host_info, 0, sizeof(host_info));
 
   host_info.ai_family   = AF_UNSPEC;
